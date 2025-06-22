@@ -1,4 +1,3 @@
-qr-generator/README.md
 # QR Short Link & QR Generator Webapp
 
 A secure, user-friendly webapp for generating short links and QR codes, with user authentication, link management, and Cloudflare-based storage.
@@ -61,7 +60,7 @@ npm install -D tailwindcss postcss autoprefixer @nuxtjs/tailwindcss eslint prett
 
 ### 4. Set Up Tailwind CSS
 
-Tailwind is already included in the project dependencies.  
+Tailwind is already included in the project dependencies.
 Dark mode and the neutral color palette are configured in `tailwind.config.js`.
 
 To customize, edit `app/tailwind.config.js`:
@@ -82,7 +81,7 @@ module.exports = {
 
 ### 5. Set Up ESLint & Prettier
 
-ESLint and Prettier are pre-configured.  
+ESLint and Prettier are pre-configured.
 To lint and format code:
 
 ```bash
