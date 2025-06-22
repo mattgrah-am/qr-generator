@@ -1,0 +1,23 @@
+name = "qr-generator"
+main = "app/.output/server/index.mjs"
+compatibility_date = "2025-06-21"
+
+[assets]
+directory = "app/.output/public"
+
+# Uncomment and configure these sections if you use D1, R2, or environment variables
+
+#[[d1_databases]]
+#binding = "DB"
+#database_name = "qr-generator-db"
+#database_id = "<your-d1-database-id>"
+
+#[[r2_buckets]]
+#binding = "QR_IMAGES"
+#bucket_name = "qr-generator-qrs"
+
+#[vars]
+#MY_ENV_VAR = "value"
+
+# Optional: Set usage model to 'unbound' for SSR/streaming
+#usage_model = "unbound"
