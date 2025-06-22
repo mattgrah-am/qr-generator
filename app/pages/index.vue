@@ -1,4 +1,3 @@
-qr-generator/app/pages/index.vue
 <template>
   <div class="min-h-screen flex flex-col items-center justify-center bg-neutral-900 text-neutral-100 transition-colors">
     <div class="w-full max-w-xl px-6 py-12 rounded-lg shadow-lg bg-neutral-800/80 backdrop-blur-md border border-neutral-800">

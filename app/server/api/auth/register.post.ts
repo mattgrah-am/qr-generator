@@ -45,12 +45,12 @@ export default defineEventHandler(async (event: H3Event) => {
       success: true,
       message: 'Registration successful (DB logic not yet implemented).',
     };
-  } catch (error: any) {
+  } catch (error) {
     return sendError(
       event,
       createError({
         statusCode: 500,
-        statusMessage: error?.message || 'Internal server error',
+        statusMessage: (error as Error)?.message || 'Internal server error',
       })
     );
   }

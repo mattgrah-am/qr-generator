@@ -32,7 +32,7 @@ export default defineEventHandler(async (event: H3Event) => {
       message: 'Login endpoint hit (DB logic not implemented yet)',
       // token: 'jwt-or-session-token'
     }
-  } catch (err: any) {
+  } catch {
     return sendError(
       event,
       createError({
