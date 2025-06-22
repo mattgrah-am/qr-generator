@@ -1,24 +1,78 @@
-# Nuxt dev/build outputs
-.output
-.data
-.nuxt
-.nitro
-.cache
-dist
+# Node
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
 
-# Node dependencies
-node_modules
+# Nuxt build output
+.nuxt/
+.output/
+dist/
+.cache/
+coverage/
+*.local
 
-# Logs
-logs
-*.log
-
-# Misc
-.DS_Store
-.fleet
-.idea
-
-# Local env files
+# Cloudflare
+wrangler.toml
+.cloudflare/
+.cloudflare-workers/
 .env
 .env.*
-!.env.example
+*.pem
+
+# VSCode and IDEs
+.vscode/
+.idea/
+*.sw?
+*.sublime-workspace
+*.sublime-project
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs/
+*.log
+
+# Test output
+test-results/
+tests/coverage/
+
+# Misc
+*.tgz
+*.gz
+*.zip
+
+# Ignore local database or storage files
+*.sqlite
+*.sqlite3
+*.db
+
+# Ignore generated docs
+docs/.vuepress/dist
+docs/dist
+
+# Project planning and rules files
+.rules
+PLANNING.md
+TASKS.md
+LIBRARY.md
+
+# Ignore by convention
+*.bak
+*.tmp
+*.swp
+*.swo
+
+# Ignore Cloudflare Pages/Workers build artifacts
+functions/
+worker/
+worker.js
+
+# Ignore local backups
+*~
