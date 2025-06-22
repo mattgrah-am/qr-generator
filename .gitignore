@@ -17,7 +17,6 @@ coverage/
 *.local
 
 # Cloudflare
-wrangler.toml
 .cloudflare/
 .cloudflare-workers/
 .env
