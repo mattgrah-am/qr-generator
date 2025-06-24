@@ -26,6 +26,8 @@ wrangler deploy --env production
 wrangler deploy --env staging
 ```
 
+**Note**: CPU limits have been removed from the configuration to support Cloudflare's Free plan. For paid plans, you can add CPU limits back in the `[limits]` section if needed.
+
 ### Environment-Specific Configuration
 Each environment has its own configuration in `wrangler.toml`:
 

@@ -46,9 +46,5 @@ NODE_ENV = "staging"
 [observability.logs]
 enabled = true
 
-# Worker limits and performance
-[limits]
-cpu_ms = 50
-
 # For SSR/streaming support
 usage_model = "standard"
