@@ -21,6 +21,8 @@ coverage/
 .cloudflare-workers/
 .env
 .env.*
+.dev.vars
+.prod.vars
 *.pem
 
 # VSCode and IDEs

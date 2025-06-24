@@ -14,16 +14,16 @@ directory = "app/.output/public"
 [[d1_databases]]
 binding = "DB"
 database_name = "qr-generator-db"
-database_id = "a57c8299-54e0-43f3-889d-3c09539dcf0b"
+database_id = "${D1_DATABASE_ID}"
 
 # R2 Storage configuration
 [[r2_buckets]]
 binding = "QR_IMAGES"
-bucket_name = "qr-generator-qrs"
+bucket_name = "${R2_BUCKET_NAME}"
 
 # Environment variables
 [vars]
-BASE_URL = "https://qr.matg.dev"
+BASE_URL = "${BASE_URL}"
 NODE_ENV = "production"
 
 # Observability and logging

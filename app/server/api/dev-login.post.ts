@@ -6,12 +6,13 @@ import { getHeader, setCookie, setResponseStatus, readBody } from 'h3'
  * Local development bypass for authentication
  */
 export default defineEventHandler(async (event: H3Event) => {
-  // Only allow in development - simplified check for local wrangler dev
-  const isLocal = getHeader(event, 'host')?.includes('localhost') || 
-                 getHeader(event, 'host')?.includes('127.0.0.1') ||
-                 true // Always allow for now in local development
+  // Only allow in development - strict security check
+  const host = getHeader(event, 'host')
+  const isLocalHost = host?.includes('localhost') || host?.includes('127.0.0.1')
+  const isDevEnvironment = process.env.NODE_ENV === 'development' || !process.env.NODE_ENV
   
-  if (!isLocal) {
+  // SECURITY: Only allow in actual local development
+  if (!isLocalHost || !isDevEnvironment) {
     setResponseStatus(event, 404)
     return {
       error: 'Not found'
