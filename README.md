@@ -35,7 +35,7 @@ A secure, user-friendly webapp for generating short links and QR codes, with use
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/qr-generator.git
+git clone https://github.com/mattgrah-am/qr-generator.git
 cd qr-generator
 ```
 
