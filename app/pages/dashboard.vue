@@ -58,9 +58,30 @@ qr-generator/app/pages/dashboard.vue
               <div class="text-neutral-400 text-sm truncate max-w-xs">{{ link.target_url }}</div>
             </div>
             <div class="flex gap-2">
-              <button class="px-2 py-1 rounded bg-neutral-700 text-neutral-200 text-xs hover:bg-neutral-600 transition">Copy</button>
-              <button class="px-2 py-1 rounded bg-neutral-700 text-neutral-200 text-xs hover:bg-neutral-600 transition">QR</button>
-              <button class="px-2 py-1 rounded bg-red-600 text-white text-xs hover:bg-red-500 transition">Delete</button>
+              <button 
+                class="px-2 py-1 rounded bg-neutral-700 text-neutral-200 text-xs hover:bg-neutral-600 transition"
+                title="Copy short link"
+                @click="copyLink(link.slug)"
+              >
+                Copy
+              </button>
+              <button 
+                class="px-2 py-1 rounded bg-neutral-700 text-neutral-200 text-xs hover:bg-neutral-600 transition"
+                :disabled="!link.qr_url"
+                title="Download QR code"
+                @click="downloadQR(link)"
+              >
+                QR
+              </button>
+              <button 
+                class="px-2 py-1 rounded bg-red-600 text-white text-xs hover:bg-red-500 transition disabled:opacity-50"
+                :disabled="deleting === link.id"
+                title="Delete link"
+                @click="deleteLink(link.id)"
+              >
+                <span v-if="deleting === link.id">...</span>
+                <span v-else>Delete</span>
+              </button>
             </div>
           </div>
         </div>
@@ -78,12 +99,20 @@ import { ref, onMounted } from 'vue'
 
 const loading = ref(true)
 const atLimit = ref(false)
-const links = ref<Array<{ id: string; slug: string; target_url: string }>>([])
+const links = ref<Array<{ 
+  id: string; 
+  slug: string; 
+  target_url: string; 
+  qr_url?: string; 
+  created_at: string;
+  updated_at?: string;
+}>>([])
 const error = ref('')
 const newLinkUrl = ref('')
 const creating = ref(false)
 const createError = ref('')
 const createSuccess = ref('')
+const deleting = ref<string | null>(null)
 
 // Fetch links from API
 const fetchLinks = async () => {
@@ -126,9 +155,10 @@ const createLink = async () => {
     if (postError.value) {
       createError.value = postError.value.statusMessage || 'Failed to create link.'
     } else if (data.value?.success) {
-      createSuccess.value = 'Short link created!'
+      createSuccess.value = 'Short link and QR code created!'
       newLinkUrl.value = ''
       await fetchLinks()
+      clearMessages()
     } else {
       createError.value = data.value?.message || 'Failed to create link.'
     }
@@ -137,6 +167,80 @@ const createLink = async () => {
   } finally {
     creating.value = false
   }
+}
+
+// Delete a link
+const deleteLink = async (linkId: string) => {
+  if (!confirm('Are you sure you want to delete this link? This action cannot be undone.')) {
+    return
+  }
+  deleting.value = linkId
+  try {
+    const response = await $fetch(`/api/links/${linkId}`, {
+      method: 'DELETE',
+    })
+    if (response.success) {
+      createSuccess.value = 'Link deleted successfully!'
+      await fetchLinks()
+      clearMessages()
+    } else {
+      createError.value = response.message || 'Failed to delete link.'
+    }
+  } catch {
+    createError.value = 'Failed to delete link.'
+  } finally {
+    deleting.value = null
+  }
+}
+
+// Copy short link to clipboard
+const copyLink = async (slug: string) => {
+  const shortUrl = `${window.location.origin}/api/s/${slug}`
+  try {
+    await navigator.clipboard.writeText(shortUrl)
+    createSuccess.value = 'Link copied to clipboard!'
+    setTimeout(() => { createSuccess.value = '' }, 2000)
+  } catch {
+    createError.value = 'Failed to copy link.'
+    setTimeout(() => { createError.value = '' }, 2000)
+  }
+}
+
+// Download QR code
+const downloadQR = async (link: typeof links.value[0]) => {
+  if (!link.qr_url) {
+    createError.value = 'QR code not available.'
+    return
+  }
+  
+  try {
+    const response = await fetch(link.qr_url)
+    if (!response.ok) throw new Error('Failed to fetch QR code')
+    
+    const blob = await response.blob()
+    const url = window.URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `qr-${link.slug}.png`
+    document.body.appendChild(a)
+    a.click()
+    window.URL.revokeObjectURL(url)
+    document.body.removeChild(a)
+    
+    createSuccess.value = 'QR code downloaded!'
+    setTimeout(() => { createSuccess.value = '' }, 2000)
+  } catch {
+    createError.value = 'Failed to download QR code.'
+    setTimeout(() => { createError.value = '' }, 2000)
+  }
+}
+
+// Clear messages after 3 seconds
+const clearMessages = () => {
+  setTimeout(() => {
+    createError.value = ''
+    createSuccess.value = ''
+  }, 3000)
 }
 
 // Initial fetch

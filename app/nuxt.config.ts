@@ -26,8 +26,11 @@ export default defineNuxtConfig({
     transpile: []
   },
   nitro: {
-    // For Cloudflare deployment
-    preset: 'cloudflare'
+    // For Cloudflare Workers with D1/R2 bindings (requires ES module format)
+    preset: 'cloudflare-module',
+    experimental: {
+      wasm: true
+    }
   },
   compatibilityDate: '2025-06-21',
 })
