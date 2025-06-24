@@ -23,7 +23,20 @@
           <div class="mt-4 text-center">
             <span class="text-neutral-400">Signed in as:</span>
             <span class="font-semibold text-neutral-100 ml-1">{{ userEmail }}</span>
-            <a href="/cdn-cgi/access/logout" class="ml-4 underline text-red-400">Sign out</a>
+          </div>
+          <div class="mt-4 flex gap-4 justify-center">
+            <NuxtLink
+              to="/dashboard"
+              class="inline-block px-6 py-2 rounded bg-neutral-400 text-neutral-900 font-semibold shadow hover:bg-neutral-300 transition"
+            >
+              Go to Dashboard
+            </NuxtLink>
+            <a 
+              href="/cdn-cgi/access/logout" 
+              class="inline-block px-6 py-2 rounded border border-red-600 text-red-400 font-semibold hover:bg-red-600 hover:text-white transition"
+            >
+              Sign out
+            </a>
           </div>
         </template>
         <template v-else>
@@ -50,6 +63,11 @@
 <script setup lang="ts">
 const { data } = await useFetch('/api/me')
 const userEmail = data.value?.email || null
+
+// Redirect authenticated users to dashboard
+if (userEmail) {
+  await navigateTo('/dashboard')
+}
 </script>
 
 <!-- No custom styles needed; using Tailwind built-in dark mode classes -->
