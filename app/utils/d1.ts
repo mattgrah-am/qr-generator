@@ -6,7 +6,17 @@ import type { H3Event } from 'h3'
  */
 export function getD1Database(event: H3Event) {
   // In Cloudflare Workers runtime, D1 binding is available via event.context.cloudflare.env
-  return event.context.cloudflare?.env?.DB || event.context?.DB
+  const db = event.context.cloudflare?.env?.DB || event.context?.DB
+  
+  if (!db) {
+    console.error('D1 database binding not found. Available context:', {
+      cloudflare: !!event.context.cloudflare,
+      env: event.context.cloudflare?.env ? Object.keys(event.context.cloudflare.env) : undefined,
+      contextKeys: Object.keys(event.context || {})
+    })
+  }
+  
+  return db
 }
 
 /**
