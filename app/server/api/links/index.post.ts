@@ -1,5 +1,5 @@
 import type { H3Event } from 'h3'
-import { sendError, createError } from 'h3'
+import { sendError, createError, readBody } from 'h3'
 import { getUserFromAccess } from '@/utils/getUserFromAccess'
 import { getD1Database, generateSlug, generateId, isValidUrl } from '@/utils/d1'
 import { generateQRCode, buildShortUrl } from '@/utils/qr'

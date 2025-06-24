@@ -1,5 +1,5 @@
 import type { H3Event } from 'h3'
-import { sendError, createError } from 'h3'
+import { sendError, createError, getRouterParam, getHeader, sendRedirect } from 'h3'
 import { getD1Database } from '@/utils/d1'
 
 /**

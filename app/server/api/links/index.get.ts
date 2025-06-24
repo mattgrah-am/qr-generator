@@ -1,4 +1,5 @@
 import type { H3Event } from 'h3'
+import { setResponseStatus } from 'h3'
 import { getUserFromAccess } from '@/utils/getUserFromAccess'
 import { getD1Database } from '@/utils/d1'
 

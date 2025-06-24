@@ -40,12 +40,34 @@
           </div>
         </template>
         <template v-else>
+          <!-- Production SSO -->
           <a
             href="/"
             class="inline-block px-6 py-2 rounded bg-neutral-400 text-neutral-900 font-semibold shadow hover:bg-neutral-300 transition"
           >
             Sign in with SSO
           </a>
+          
+          <!-- Local Development Bypass -->
+          <div v-if="isDev" class="mt-4 p-4 bg-yellow-900/20 border border-yellow-600 rounded-lg">
+            <p class="text-yellow-400 text-sm mb-2">🧑‍💻 Local Development Mode</p>
+            <div class="flex gap-2">
+              <input
+                v-model="devEmail"
+                type="email"
+                placeholder="Enter any email for testing"
+                class="flex-1 px-3 py-2 bg-neutral-700 text-neutral-100 border border-neutral-600 rounded focus:border-neutral-400 focus:outline-none"
+              />
+              <button
+                @click="devLogin"
+                :disabled="!devEmail || devLoading"
+                class="px-4 py-2 bg-yellow-600 text-white rounded hover:bg-yellow-700 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                <span v-if="devLoading">...</span>
+                <span v-else>Login</span>
+              </button>
+            </div>
+          </div>
         </template>
       </div>
       <div class="mt-4 text-neutral-400 text-center text-sm">
@@ -67,6 +89,30 @@ const userEmail = data.value?.email || null
 // Redirect authenticated users to dashboard
 if (userEmail) {
   await navigateTo('/dashboard')
+}
+
+// Development mode detection and state - simplified to always show on localhost
+const isDev = ref(true) // Always show for now since we're in local development
+const devEmail = ref('test@example.com')
+const devLoading = ref(false)
+
+const devLogin = async () => {
+  if (!devEmail.value) return
+  
+  devLoading.value = true
+  try {
+    await $fetch('/api/dev-login', {
+      method: 'POST',
+      body: { email: devEmail.value }
+    })
+    
+    // Refresh the page to trigger authentication check
+    await navigateTo('/dashboard')
+  } catch (error) {
+    console.error('Dev login failed:', error)
+  } finally {
+    devLoading.value = false
+  }
 }
 </script>
 

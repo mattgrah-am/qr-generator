@@ -1,5 +1,5 @@
 import type { H3Event } from 'h3'
-import { sendError, createError } from 'h3'
+import { sendError, createError, getRouterParam } from 'h3'
 import { getUserFromAccess } from '@/utils/getUserFromAccess'
 import { getD1Database } from '@/utils/d1'
 import { deleteQRImage, generateQRFileName } from '@/utils/r2'

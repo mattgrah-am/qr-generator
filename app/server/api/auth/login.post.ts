@@ -1,5 +1,5 @@
 import type { H3Event} from 'h3';
-import { sendError, createError } from 'h3'
+import { sendError, createError, readBody } from 'h3'
 
 /**
  * POST /api/auth/login

@@ -32,9 +32,8 @@ export async function uploadQRImage(
       }
     })
 
-    // Return the public URL (this would be your R2 custom domain or public URL)
-    // For now, return a placeholder that indicates the file path
-    return `/qr/${fileName}`
+    // Return the API route to serve the QR code from R2
+    return `/api/qr/${fileName}`
   } catch (error) {
     console.error('Failed to upload QR code to R2:', error)
     return null
