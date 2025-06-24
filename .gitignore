@@ -75,3 +75,4 @@ worker.js
 
 # Ignore local backups
 *~
+.wrangler/

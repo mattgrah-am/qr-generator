@@ -97,13 +97,32 @@ Configuration files:
 
 #### a. Cloudflare D1 (Database)
 
-- Create a D1 database via the Cloudflare dashboard.
-- Save your database binding name and credentials.
+Create and initialize the D1 database:
+
+```bash
+# Create D1 database
+npx wrangler d1 create qr-generator-db
+
+# Apply schema to local database
+npx wrangler d1 execute qr-generator-db --file=cloudflare/d1-schema.sql
+
+# Apply schema to remote database
+npx wrangler d1 execute qr-generator-db --remote --file=cloudflare/d1-schema.sql
+```
+
+The database ID will be shown in the output. Update `wrangler.toml` with the actual database ID.
 
 #### b. Cloudflare R2 (Object Storage)
 
-- Create an R2 bucket for QR images.
-- Save your bucket name and credentials.
+Create the R2 bucket for QR code images:
+
+```bash
+# Create R2 bucket
+npx wrangler r2 bucket create qr-generator-qrs
+
+# Verify bucket creation
+npx wrangler r2 bucket list
+```
 
 #### c. Cloudflare Pages/Workers
 

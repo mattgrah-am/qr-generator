@@ -1,24 +1,34 @@
 import type { H3Event } from 'h3'
 import { sendError, createError } from 'h3'
+import { getUserFromAccess } from '@/utils/getUserFromAccess'
+import { getD1Database, generateSlug, generateId, isValidUrl } from '@/utils/d1'
+import { generateQRCode, buildShortUrl } from '@/utils/qr'
+import { uploadQRImage, generateQRFileName } from '@/utils/r2'
 
 /**
  * POST /api/links
  * Create a new short link for the authenticated user.
  * Enforces a maximum of 10 links per user.
- * (Mock data version — replace with D1 integration later)
  */
 export default defineEventHandler(async (event: H3Event) => {
-  // Simulate getting the authenticated user's email from Cloudflare Access
-  const userEmail =
-    event.node.req.headers['cf-access-authenticated-user-email'] ||
-    event.node.req.headers['Cf-Access-Authenticated-User-Email']
-
+  const userEmail = getUserFromAccess(event)
   if (!userEmail) {
     return sendError(
       event,
       createError({
         statusCode: 401,
         statusMessage: 'Unauthorized: Cloudflare Access authentication required.',
+      })
+    )
+  }
+
+  const db = getD1Database(event)
+  if (!db) {
+    return sendError(
+      event,
+      createError({
+        statusCode: 500,
+        statusMessage: 'Database unavailable',
       })
     )
   }
@@ -35,42 +45,104 @@ export default defineEventHandler(async (event: H3Event) => {
     )
   }
 
-  // Mock: Simulate fetching user's links (replace with D1 query)
-  // For demonstration, pretend the user already has 9 links
-  const mockLinks = [
-    { id: '1', slug: 'abc123', target_url: 'https://example.com' },
-    { id: '2', slug: 'xyz789', target_url: 'https://nuxt.com' },
-    { id: '3', slug: 'foo', target_url: 'https://foo.com' },
-    { id: '4', slug: 'bar', target_url: 'https://bar.com' },
-    { id: '5', slug: 'baz', target_url: 'https://baz.com' },
-    { id: '6', slug: 'qux', target_url: 'https://qux.com' },
-    { id: '7', slug: 'quux', target_url: 'https://quux.com' },
-    { id: '8', slug: 'corge', target_url: 'https://corge.com' },
-    { id: '9', slug: 'grault', target_url: 'https://grault.com' }
-  ]
-
-  // Enforce 10-link limit
-  if (mockLinks.length >= 10) {
+  // Validate URL
+  if (!isValidUrl(body.target_url)) {
     return sendError(
       event,
       createError({
-        statusCode: 403,
-        statusMessage: 'Link limit reached. You can only have up to 10 short links.',
+        statusCode: 400,
+        statusMessage: 'Invalid URL format.',
       })
     )
   }
 
-  // Mock: Simulate creating a new link
-  const newLink = {
-    id: String(mockLinks.length + 1),
-    slug: Math.random().toString(36).substring(2, 8), // Random 6-char slug
-    target_url: body.target_url,
-  }
+  try {
+    // First, ensure user exists in database
+    let user = await db.prepare('SELECT id FROM users WHERE email = ?').bind(userEmail).first()
+    
+    if (!user) {
+      // Create user if they don't exist
+      const userId = generateId()
+      await db.prepare('INSERT INTO users (id, email) VALUES (?, ?)').bind(userId, userEmail).run()
+      user = { id: userId }
+    }
 
-  // Mock: Return the new link (in real implementation, insert into D1)
-  return {
-    success: true,
-    link: newLink,
-    message: 'Short link created (mock data, not persisted).',
+    // Check current link count for 10-link limit
+    const linkCount = await db.prepare('SELECT COUNT(*) as count FROM links WHERE user_id = ?').bind(user.id).first()
+    
+    if (linkCount && linkCount.count >= 10) {
+      return sendError(
+        event,
+        createError({
+          statusCode: 403,
+          statusMessage: 'Link limit reached. You can only have up to 10 short links.',
+        })
+      )
+    }
+
+    // Generate unique slug
+    let slug = generateSlug()
+    let slugExists = true
+    let attempts = 0
+    
+    while (slugExists && attempts < 10) {
+      const existing = await db.prepare('SELECT id FROM links WHERE slug = ?').bind(slug).first()
+      if (!existing) {
+        slugExists = false
+      } else {
+        slug = generateSlug()
+        attempts++
+      }
+    }
+
+    if (slugExists) {
+      return sendError(
+        event,
+        createError({
+          statusCode: 500,
+          statusMessage: 'Failed to generate unique slug. Please try again.',
+        })
+      )
+    }
+
+    // Create new link
+    const linkId = generateId()
+    const now = new Date().toISOString()
+    
+    // Generate QR code
+    const shortUrl = buildShortUrl(slug)
+    const qrBuffer = await generateQRCode(shortUrl)
+    const qrFileName = generateQRFileName(slug)
+    const qrImageUrl = await uploadQRImage(event, qrBuffer, qrFileName)
+    
+    // Insert link with QR image URL
+    await db.prepare(`
+      INSERT INTO links (id, user_id, slug, target_url, qr_image_url, created_at, updated_at) 
+      VALUES (?, ?, ?, ?, ?, ?, ?)
+    `).bind(linkId, user.id, slug, body.target_url, qrImageUrl, now, now).run()
+
+    const newLink = {
+      id: linkId,
+      slug,
+      target_url: body.target_url,
+      qr_url: qrImageUrl,
+      created_at: now,
+      updated_at: now,
+    }
+
+    return {
+      success: true,
+      link: newLink,
+      message: 'Short link and QR code created successfully.',
+    }
+  } catch (error) {
+    console.error('D1 query error:', error)
+    return sendError(
+      event,
+      createError({
+        statusCode: 500,
+        statusMessage: 'Failed to create link',
+      })
+    )
   }
 })
